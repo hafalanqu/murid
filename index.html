@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Siswa - HafalanQu</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="flex flex-col items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-10">
+                <h1 class="text-3xl sm:text-5xl font-bold text-teal-600">HafalanQu</h1>
+                <p class="text-base text-slate-500 mt-2">Pendaftaran Akun Siswa</p>
+            </div>
+            <div class="bg-white p-6 sm:p-8 rounded-lg shadow-md">
+                <form id="register-form">
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                        <input type="email" id="email" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input type="password" id="password" class="w-full px-3 py-2 pr-10 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" required>
+                            <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 focus:outline-none">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                </svg>
+                                <svg id="eye-off-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074L3.707 2.293zM10 12a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                                    <path d="M2 10C2 5.943 5.522 3 10 3a9.958 9.958 0 014.512 1.074l-1.78 1.781A4 4 0 0010 6a4 4 0 00-4 4c0 .517.1.1017.284 1.485l-1.42 1.42A9.955 9.955 0 012 10z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                     <div class="mb-6">
+                        <label for="lembagaId" class="block text-sm font-medium text-slate-700 mb-1">ID Lembaga</label>
+                        <input type="text" id="lembagaId" value="man2brebes" class="w-full px-3 py-2 border border-slate-300 rounded-md bg-slate-100 cursor-not-allowed" readonly>
+                         <p class="text-xs text-slate-400 mt-1">ID ini diatur oleh administrator.</p>
+                    </div>
+                    <p id="message" class="text-sm text-center mb-4"></p>
+                    <button type="submit" class="w-full bg-teal-600 text-white py-2 rounded-md hover:bg-teal-700 transition-colors">Daftar</button>
+                </form>
+            </div>
+            <p class="text-center text-sm text-slate-500 mt-6">
+                Sudah punya akun? <a href="[URL_APLIKASI_UTAMA_ANDA]" class="font-medium text-teal-600 hover:underline">Login di sini</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
+    <script>
+        // !! GUNAKAN KONFIGURASI FIREBASE YANG SAMA PERSIS DENGAN APLIKASI UTAMA ANDA !!
+        const firebaseConfig = {
+             apiKey: "AIzaSyB4zxl2TCsevr7KKfdpIQYE3VRyfr-rLOY",
+            authDomain: "hafalanqu-app.firebaseapp.com",
+            projectId: "hafalanqu-app",
+            storageBucket: "hafalanqu-app.firebasestorage.app",
+            messagingSenderId: "1032716870319",
+            appId: "1:1032716870319:web:30bd0e7353ae806f676a5a"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        const registerForm = document.getElementById('register-form');
+        const messageEl = document.getElementById('message');
+        const passwordInput = document.getElementById('password');
+        const togglePasswordButton = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eye-icon');
+        const eyeOffIcon = document.getElementById('eye-off-icon');
+
+        togglePasswordButton.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.classList.toggle('hidden', isPassword);
+            eyeOffIcon.classList.toggle('hidden', !isPassword);
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const lembagaId = document.getElementById('lembagaId').value;
+            const submitButton = e.target.querySelector('button[type="submit"]');
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Memproses...';
+            messageEl.textContent = '';
+            messageEl.className = 'text-sm text-center mb-4';
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                const userDocRef = db.collection('users').doc(user.uid);
+                await userDocRef.set({
+                    email: user.email,
+                    role: "siswa", // <-- INI PERBEDAANNYA
+                    lembagaId: lembagaId
+                });
+                
+                messageEl.textContent = 'Pendaftaran berhasil! Anda akan diarahkan ke halaman login.';
+                messageEl.classList.add('text-green-600');
+                
+                setTimeout(() => {
+                    window.location.href = 'https:hafalanqu.my.id'; // Ganti dengan URL aplikasi utama Anda
+                }, 3000);
+
+            } catch (error) {
+                // Logika penanganan error sama persis dengan form guru
+                let message = 'Terjadi kesalahan. Coba lagi.';
+                if (error.code) {
+                    switch (error.code) {
+                        case 'auth/email-already-in-use':
+                            message = 'Email ini sudah terdaftar.'; break;
+                        case 'auth/weak-password':
+                            message = 'Password terlalu lemah. Minimal 6 karakter.'; break;
+                        case 'auth/invalid-email':
+                            message = 'Format email tidak valid.'; break;
+                    }
+                }
+                messageEl.textContent = message;
+                messageEl.classList.add('text-red-600');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Daftar';
+            }
+        });
+    </script>
+</body>
+</html>
+
+
